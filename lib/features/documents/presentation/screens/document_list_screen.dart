@@ -54,6 +54,7 @@ class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
               : documentState.documents.isEmpty
                   ? const Center(child: Text('No hay documentos'))
                   : ListView.builder(
+                      padding: const EdgeInsets.only(top: 16),
                       itemCount: documentState.documents.length,
                       itemBuilder: (context, index) {
                         final document = documentState.documents[index];

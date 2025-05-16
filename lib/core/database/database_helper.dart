@@ -19,8 +19,9 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'document_manager.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
       onOpen: _onOpen,
     );
   }
@@ -65,6 +66,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         imgLocalPath TEXT NOT NULL,
+        scannedText TEXT NOT NULL,
         statusId INTEGER NOT NULL,
         userId INTEGER NOT NULL,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -103,6 +105,14 @@ class DatabaseHelper {
     });
   }
 
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add scannedText column to documents table
+      await db.execute(
+          'ALTER TABLE documents ADD COLUMN scannedText TEXT NOT NULL DEFAULT ""');
+    }
+  }
+
   Future<void> _onOpen(Database db) async {
     // Verificar si existe el usuario administrador
     final List<Map<String, dynamic>> adminUser = await db.query(
@@ -122,5 +132,8 @@ class DatabaseHelper {
         'createdAt': DateTime.now().toIso8601String(),
       });
     }
+
+    // Enable foreign keys
+    await db.execute('PRAGMA foreign_keys = ON');
   }
 }

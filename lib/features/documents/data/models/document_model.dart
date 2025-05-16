@@ -2,29 +2,24 @@ import '../../domain/entities/document.dart';
 
 class DocumentModel extends Document {
   DocumentModel({
-    int? id,
-    required String name,
-    required String imgLocalPath,
-    required int statusId,
-    required int userId,
-    required DateTime createdAt,
-  }) : super(
-          id: id,
-          name: name,
-          imgLocalPath: imgLocalPath,
-          statusId: statusId,
-          userId: userId,
-          createdAt: createdAt,
-        );
+    required super.name,
+    required super.imgLocalPath,
+    required super.scannedText,
+    required super.statusId,
+    required super.userId,
+    required super.createdAt,
+    super.id,
+  });
 
   factory DocumentModel.fromJson(Map<String, dynamic> json) {
     return DocumentModel(
-      id: json['id'],
-      name: json['name'],
-      imgLocalPath: json['imgLocalPath'],
-      statusId: json['statusId'],
-      userId: json['userId'],
-      createdAt: DateTime.parse(json['createdAt']),
+      id: json['id'] as int,
+      name: json['name'] as String,
+      imgLocalPath: json['imgLocalPath'] as String,
+      scannedText: json['scannedText'] as String,
+      statusId: json['statusId'] as int,
+      userId: json['userId'] as int,
+      createdAt: DateTime.parse(json['createdAt'] as String),
     );
   }
 
@@ -33,6 +28,7 @@ class DocumentModel extends Document {
       id: id ?? document.id,
       name: document.name,
       imgLocalPath: document.imgLocalPath,
+      scannedText: document.scannedText,
       statusId: document.statusId,
       userId: document.userId,
       createdAt: document.createdAt,
@@ -44,6 +40,7 @@ class DocumentModel extends Document {
       'id': id,
       'name': name,
       'imgLocalPath': imgLocalPath,
+      'scannedText': scannedText,
       'statusId': statusId,
       'userId': userId,
       'createdAt': createdAt.toIso8601String(),

@@ -2,13 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../core/database/database_helper.dart';
-import '../../../auth/data/repositories/user_repository_impl.dart';
-import '../../../auth/domain/entities/user.dart';
-import '../../../auth/presentation/providers/auth_provider.dart';
-import '../../domain/entities/document.dart';
-import '../providers/document_provider.dart';
+import 'package:proyecto_flutter_ucb_david_rios/core/database/database_helper.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/auth/data/repositories/user_repository_impl.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/auth/domain/entities/user.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/auth/presentation/providers/auth_provider.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/documents/domain/entities/document.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/documents/presentation/providers/document_provider.dart';
 
 class DocumentDetailScreen extends ConsumerStatefulWidget {
   final Document document;
@@ -99,6 +98,27 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
     }
   }
 
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(value),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authProvider).currentUser;
@@ -121,9 +141,7 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Información del documento
-            const SizedBox(
-              height: 16,
-            ),
+            const SizedBox(height: 16),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -211,75 +229,30 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Información del documento
+            // Texto escaneado del documento
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Nombre del documento',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      updatedDocument.name,
-                      style: Theme.of(context).textTheme.bodyLarge,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Estado',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(
-                          child: Text(
-                            _getStatusText(updatedDocument.statusId),
-                            style: TextStyle(
-                              color: _getStatusColor(updatedDocument.statusId),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                        const Icon(Icons.text_fields, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Texto Escaneado',
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        if (isAdmin) // Solo mostrar opciones si es admin
-                          PopupMenuButton<int>(
-                            icon: const Icon(Icons.edit),
-                            tooltip: 'Cambiar estado',
-                            onSelected: (statusId) =>
-                                _showStatusChangeDialog(statusId),
-                            itemBuilder: (context) => [
-                              const PopupMenuItem(
-                                value: 1,
-                                child: Text('Pendiente'),
-                              ),
-                              const PopupMenuItem(
-                                value: 2,
-                                child: Text('Aprobar'),
-                              ),
-                              const PopupMenuItem(
-                                value: 3,
-                                child: Text('Rechazar'),
-                              ),
-                              const PopupMenuItem(
-                                value: 4,
-                                child: Text('Cancelar'),
-                              ),
-                            ],
-                          ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Fecha y hora de creación',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
+                    const Divider(),
                     const SizedBox(height: 8),
                     Text(
-                      '${updatedDocument.createdAt.day}/${updatedDocument.createdAt.month}/${updatedDocument.createdAt.year} a las ${updatedDocument.createdAt.hour}:${updatedDocument.createdAt.minute.toString().padLeft(2, '0')}',
-                      style: Theme.of(context).textTheme.bodyLarge,
+                      updatedDocument.scannedText.isEmpty
+                          ? 'No hay texto escaneado'
+                          : updatedDocument.scannedText,
+                      style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],
                 ),
@@ -287,7 +260,7 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Información del usuario
+            // Información del creador
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),
@@ -315,27 +288,6 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.grey,
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(value),
-        ),
-      ],
     );
   }
 }

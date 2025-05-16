@@ -159,11 +159,14 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.delete),
-                  onPressed: () =>
-                      ref.read(authProvider.notifier).deleteUser(user.id!),
-                ),
+                user.email == 'admin@admin.com'
+                    ? const SizedBox()
+                    : IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () => ref
+                            .read(authProvider.notifier)
+                            .deleteUser(user.id!),
+                      ),
               ],
             ),
           );

@@ -65,6 +65,7 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
   Future<void> createDocument({
     required String name,
     required String imgLocalPath,
+    required String scannedText,
     required int statusId,
     required int userId,
   }) async {
@@ -73,6 +74,7 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
       final document = Document(
         name: name,
         imgLocalPath: imgLocalPath,
+        scannedText: scannedText,
         statusId: statusId,
         userId: userId,
         createdAt: DateTime.now(),
