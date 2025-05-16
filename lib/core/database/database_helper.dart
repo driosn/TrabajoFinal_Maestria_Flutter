@@ -1,0 +1,113 @@
+import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+
+class DatabaseHelper {
+  static final DatabaseHelper _instance = DatabaseHelper._internal();
+  static Database? _database;
+
+  factory DatabaseHelper() => _instance;
+
+  DatabaseHelper._internal();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDatabase();
+    return _database!;
+  }
+
+  Future<Database> _initDatabase() async {
+    String path = join(await getDatabasesPath(), 'document_manager.db');
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _onCreate,
+      onOpen: _onOpen,
+    );
+  }
+
+  Future<void> _onCreate(Database db, int version) async {
+    // Create Roles table
+    await db.execute('''
+      CREATE TABLE roles(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        role TEXT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
+
+    // Create Users table
+    await db.execute('''
+      CREATE TABLE users(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        lastName TEXT NOT NULL,
+        email TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        roleId INTEGER NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (roleId) REFERENCES roles (id)
+      )
+    ''');
+
+    // Create Statuses table
+    await db.execute('''
+      CREATE TABLE statuses(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        status TEXT NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      )
+    ''');
+
+    // Create Documents table
+    await db.execute('''
+      CREATE TABLE documents(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        imgLocalPath TEXT NOT NULL,
+        statusId INTEGER NOT NULL,
+        createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (statusId) REFERENCES statuses (id)
+      )
+    ''');
+
+    // Insert default roles
+    await db.insert('roles', {'role': 'Editor'});
+    await db.insert('roles', {'role': 'Admin'});
+
+    // Insert default statuses
+    await db.insert('statuses', {'status': 'Pendiente'});
+    await db.insert('statuses', {'status': 'Aprobado'});
+    await db.insert('statuses', {'status': 'Rechazado'});
+
+    // Insert default admin user
+    await db.insert('users', {
+      'name': 'Admin',
+      'lastName': 'User',
+      'email': 'admin@admin.com',
+      'password': 'admin1234',
+      'roleId': 2, // Admin role
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> _onOpen(Database db) async {
+    // Verificar si existe el usuario administrador
+    final List<Map<String, dynamic>> adminUser = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: ['admin@admin.com'],
+    );
+
+    if (adminUser.isEmpty) {
+      // Si no existe, crear el usuario administrador
+      await db.insert('users', {
+        'name': 'Admin',
+        'lastName': 'User',
+        'email': 'admin@admin.com',
+        'password': 'admin1234',
+        'roleId': 2, // Admin role
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    }
+  }
+}
