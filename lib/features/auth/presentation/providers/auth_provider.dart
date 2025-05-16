@@ -40,7 +40,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   AuthNotifier(this._userRepository) : super(AuthState());
 
-  Future<void> _loadUsers() async {
+  Future<void> loadUsers() async {
     try {
       final users = await _userRepository.getUsers();
       state = state.copyWith(users: users, isLoading: false);
@@ -88,7 +88,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _userRepository.createUser(user);
-      await _loadUsers();
+      await loadUsers();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -101,7 +101,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _userRepository.deleteUser(id);
-      await _loadUsers();
+      await loadUsers();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -114,7 +114,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _userRepository.updateUser(user);
-      await _loadUsers();
+      await loadUsers();
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
