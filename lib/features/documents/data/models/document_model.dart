@@ -6,12 +6,14 @@ class DocumentModel extends Document {
     required String name,
     required String imgLocalPath,
     required int statusId,
+    required int userId,
     required DateTime createdAt,
   }) : super(
           id: id,
           name: name,
           imgLocalPath: imgLocalPath,
           statusId: statusId,
+          userId: userId,
           createdAt: createdAt,
         );
 
@@ -21,6 +23,7 @@ class DocumentModel extends Document {
       name: json['name'],
       imgLocalPath: json['imgLocalPath'],
       statusId: json['statusId'],
+      userId: json['userId'],
       createdAt: DateTime.parse(json['createdAt']),
     );
   }
@@ -31,6 +34,7 @@ class DocumentModel extends Document {
       name: document.name,
       imgLocalPath: document.imgLocalPath,
       statusId: document.statusId,
+      userId: document.userId,
       createdAt: document.createdAt,
     );
   }
@@ -41,6 +45,7 @@ class DocumentModel extends Document {
       'name': name,
       'imgLocalPath': imgLocalPath,
       'statusId': statusId,
+      'userId': userId,
       'createdAt': createdAt.toIso8601String(),
     };
   }

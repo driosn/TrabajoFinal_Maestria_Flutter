@@ -3,6 +3,7 @@ class Document {
   final String name;
   final String imgLocalPath;
   final int statusId;
+  final int userId;
   final DateTime createdAt;
 
   Document({
@@ -10,6 +11,7 @@ class Document {
     required this.name,
     required this.imgLocalPath,
     required this.statusId,
+    required this.userId,
     required this.createdAt,
   });
 
@@ -18,6 +20,7 @@ class Document {
     String? name,
     String? imgLocalPath,
     int? statusId,
+    int? userId,
     DateTime? createdAt,
   }) {
     return Document(
@@ -25,6 +28,7 @@ class Document {
       name: name ?? this.name,
       imgLocalPath: imgLocalPath ?? this.imgLocalPath,
       statusId: statusId ?? this.statusId,
+      userId: userId ?? this.userId,
       createdAt: createdAt ?? this.createdAt,
     );
   }

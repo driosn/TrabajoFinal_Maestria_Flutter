@@ -34,9 +34,7 @@ class DocumentState {
 class DocumentNotifier extends StateNotifier<DocumentState> {
   final DocumentRepository _documentRepository;
 
-  DocumentNotifier(this._documentRepository) : super(DocumentState()) {
-    _loadDocuments();
-  }
+  DocumentNotifier(this._documentRepository) : super(DocumentState());
 
   Future<void> _loadDocuments() async {
     state = state.copyWith(isLoading: true);
@@ -51,10 +49,24 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
     }
   }
 
+  Future<void> loadDocumentsByUser(int userId) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final documents = await _documentRepository.getDocumentsByUser(userId);
+      state = state.copyWith(documents: documents, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
   Future<void> createDocument({
     required String name,
     required String imgLocalPath,
     required int statusId,
+    required int userId,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
@@ -62,10 +74,11 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
         name: name,
         imgLocalPath: imgLocalPath,
         statusId: statusId,
+        userId: userId,
         createdAt: DateTime.now(),
       );
       await _documentRepository.createDocument(document);
-      await _loadDocuments();
+      await loadDocumentsByUser(userId);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -78,7 +91,7 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _documentRepository.updateDocument(document);
-      await _loadDocuments();
+      await loadDocumentsByUser(document.userId);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -87,11 +100,11 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
     }
   }
 
-  Future<void> deleteDocument(int id) async {
+  Future<void> deleteDocument(int id, int userId) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
       await _documentRepository.deleteDocument(id);
-      await _loadDocuments();
+      await loadDocumentsByUser(userId);
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -105,6 +118,20 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
     try {
       final documents =
           await _documentRepository.getDocumentsByStatus(statusId);
+      state = state.copyWith(documents: documents, isLoading: false);
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
+  }
+
+  Future<void> loadDocumentsByStatusAndUser(int statusId, int userId) async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final documents = await _documentRepository.getDocumentsByStatusAndUser(
+          statusId, userId);
       state = state.copyWith(documents: documents, isLoading: false);
     } catch (e) {
       state = state.copyWith(

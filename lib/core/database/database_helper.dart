@@ -45,6 +45,7 @@ class DatabaseHelper {
         password TEXT NOT NULL,
         roleId INTEGER NOT NULL,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+        isActive INTEGER NOT NULL DEFAULT 1,
         FOREIGN KEY (roleId) REFERENCES roles (id)
       )
     ''');
@@ -65,8 +66,10 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         imgLocalPath TEXT NOT NULL,
         statusId INTEGER NOT NULL,
+        userId INTEGER NOT NULL,
         createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (statusId) REFERENCES statuses (id)
+        FOREIGN KEY (statusId) REFERENCES statuses (id),
+        FOREIGN KEY (userId) REFERENCES users (id)
       )
     ''');
 
@@ -78,6 +81,7 @@ class DatabaseHelper {
     await db.insert('statuses', {'status': 'Pendiente'});
     await db.insert('statuses', {'status': 'Aprobado'});
     await db.insert('statuses', {'status': 'Rechazado'});
+    await db.insert('statuses', {'status': 'Cancelado'});
 
     // Insert default admin user
     await db.insert('users', {
@@ -86,6 +90,15 @@ class DatabaseHelper {
       'email': 'admin@admin.com',
       'password': 'admin1234',
       'roleId': 2, // Admin role
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    await db.insert('users', {
+      'name': 'Editor',
+      'lastName': 'User',
+      'email': 'editor@editor.com',
+      'password': 'editor1234',
+      'roleId': 1, // Editor role
       'createdAt': DateTime.now().toIso8601String(),
     });
   }

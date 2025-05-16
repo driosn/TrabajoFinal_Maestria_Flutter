@@ -16,7 +16,6 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
   final _formKey = GlobalKey<FormState>();
 
   int _selectedRoleId = 1; // Default to Editor role
-  bool _obscurePassword = true;
 
   @override
   void initState() {
@@ -34,6 +33,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
     final lastNameController = TextEditingController();
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
+    final obscurePasswordNotifier = ValueNotifier<bool>(true);
 
     showDialog(
       context: context,
@@ -76,31 +76,32 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Contraseña',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                  ),
-                  obscureText: _obscurePassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Por favor ingrese una contraseña';
-                    }
-                    return null;
-                  },
-                ),
+                ValueListenableBuilder(
+                    valueListenable: obscurePasswordNotifier,
+                    builder: (context, value, child) {
+                      return TextFormField(
+                        controller: passwordController,
+                        decoration: InputDecoration(
+                          labelText: 'Contraseña',
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              value ? Icons.visibility_off : Icons.visibility,
+                            ),
+                            onPressed: () {
+                              obscurePasswordNotifier.value =
+                                  !obscurePasswordNotifier.value;
+                            },
+                          ),
+                        ),
+                        obscureText: value,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor ingrese una contraseña';
+                          }
+                          return null;
+                        },
+                      );
+                    }),
                 DropdownButtonFormField<int>(
                   value: _selectedRoleId,
                   decoration: const InputDecoration(labelText: 'Rol'),

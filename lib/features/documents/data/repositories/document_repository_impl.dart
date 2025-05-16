@@ -16,6 +16,17 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
+  Future<List<Document>> getDocumentsByUser(int userId) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'documents',
+      where: 'userId = ?',
+      whereArgs: [userId],
+    );
+    return List.generate(maps.length, (i) => DocumentModel.fromJson(maps[i]));
+  }
+
+  @override
   Future<Document> createDocument(Document document) async {
     final db = await _databaseHelper.database;
     final id = await db.insert(
@@ -52,6 +63,18 @@ class DocumentRepositoryImpl implements DocumentRepository {
       'documents',
       where: 'statusId = ?',
       whereArgs: [statusId],
+    );
+    return List.generate(maps.length, (i) => DocumentModel.fromJson(maps[i]));
+  }
+
+  @override
+  Future<List<Document>> getDocumentsByStatusAndUser(
+      int statusId, int userId) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'documents',
+      where: 'statusId = ? AND userId = ?',
+      whereArgs: [statusId, userId],
     );
     return List.generate(maps.length, (i) => DocumentModel.fromJson(maps[i]));
   }

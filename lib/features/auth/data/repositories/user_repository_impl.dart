@@ -56,4 +56,19 @@ class UserRepositoryImpl implements UserRepository {
     );
     return user;
   }
+
+  Future<User?> getUserByEmail(String email) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+
+    if (maps.isEmpty) {
+      return null;
+    }
+
+    return User.fromMap(maps.first);
+  }
 }

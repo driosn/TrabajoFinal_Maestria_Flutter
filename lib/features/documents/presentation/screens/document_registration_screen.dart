@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/document_provider.dart';
 import 'camera_screen.dart';
 
@@ -19,7 +20,7 @@ class _DocumentRegistrationScreenState
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   String? _imagePath;
-  int _selectedStatusId = 1; // Default to Pending status
+  final int _selectedStatusId = 1; // Default to Pending status
 
   @override
   void dispose() {
@@ -42,6 +43,8 @@ class _DocumentRegistrationScreenState
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = ref.watch(authProvider).currentUser;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Registrar Documento'),
@@ -88,24 +91,6 @@ class _DocumentRegistrationScreenState
                 ),
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
-                value: _selectedStatusId,
-                decoration: const InputDecoration(
-                  labelText: 'Estado',
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem(value: 1, child: Text('Pendiente')),
-                  DropdownMenuItem(value: 2, child: Text('Aprobado')),
-                  DropdownMenuItem(value: 3, child: Text('Rechazado')),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _selectedStatusId = value!;
-                  });
-                },
-              ),
-              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
@@ -118,12 +103,15 @@ class _DocumentRegistrationScreenState
                       );
                       return;
                     }
-                    ref.read(documentProvider.notifier).createDocument(
-                          name: _nameController.text,
-                          imgLocalPath: _imagePath!,
-                          statusId: _selectedStatusId,
-                        );
-                    Navigator.pop(context);
+                    if (currentUser != null) {
+                      ref.read(documentProvider.notifier).createDocument(
+                            name: _nameController.text,
+                            imgLocalPath: _imagePath!,
+                            statusId: _selectedStatusId,
+                            userId: currentUser.id!,
+                          );
+                      Navigator.pop(context);
+                    }
                   }
                 },
                 child: const Text('Registrar'),

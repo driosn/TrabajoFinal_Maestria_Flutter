@@ -103,6 +103,7 @@ class _DocumentFormScreenState extends ConsumerState<DocumentFormScreen> {
                   if (_formKey.currentState!.validate()) {
                     final document = Document(
                       id: widget.document?.id,
+                      userId: currentUser!.id!,
                       name: _nameController.text,
                       statusId: _selectedStatusId,
                       imgLocalPath: '',
@@ -111,6 +112,7 @@ class _DocumentFormScreenState extends ConsumerState<DocumentFormScreen> {
 
                     if (widget.document == null) {
                       ref.read(documentProvider.notifier).createDocument(
+                            userId: currentUser.id!,
                             name: _nameController.text,
                             imgLocalPath: '',
                             statusId: _selectedStatusId,

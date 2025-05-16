@@ -7,17 +7,36 @@ import '../../../auth/presentation/providers/auth_provider.dart';
 import '../providers/document_provider.dart';
 import 'document_registration_screen.dart';
 
-class DocumentListScreen extends ConsumerWidget {
+class DocumentListScreen extends ConsumerStatefulWidget {
   const DocumentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DocumentListScreen> createState() => _DocumentListScreenState();
+}
+
+class _DocumentListScreenState extends ConsumerState<DocumentListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentUser = ref.read(authProvider).currentUser;
+      if (currentUser != null) {
+        ref
+            .read(documentProvider.notifier)
+            .loadDocumentsByUser(currentUser.id!);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final documentState = ref.watch(documentProvider);
     final authState = ref.watch(authProvider);
+    final currentUser = authState.currentUser;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Documentos'),
+        title: const Text('Mis Documentos'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -54,33 +73,80 @@ class DocumentListScreen extends ConsumerWidget {
                               ),
                             ),
                             title: Text(document.name),
-                            subtitle: Text(
-                              _getStatusText(document.statusId),
-                              style: TextStyle(
-                                color: _getStatusColor(document.statusId),
-                              ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getStatusText(document.statusId),
+                                  style: TextStyle(
+                                    color: _getStatusColor(document.statusId),
+                                  ),
+                                ),
+                                Text(
+                                  'Creado el ${document.createdAt.day}/${document.createdAt.month}/${document.createdAt.year} a las ${document.createdAt.hour}:${document.createdAt.minute}',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
+                                        color: Colors.grey.shade500,
+                                      ),
+                                ),
+                              ],
                             ),
-                            trailing: PopupMenuButton<int>(
-                              onSelected: (statusId) {
-                                ref
-                                    .read(documentProvider.notifier)
-                                    .updateDocument(
-                                      document.copyWith(statusId: statusId),
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.image),
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => Dialog(
+                                        child: Image.file(
+                                          File(document.imgLocalPath),
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
                                     );
-                              },
-                              itemBuilder: (context) => [
-                                const PopupMenuItem(
-                                  value: 1,
-                                  child: Text('Pendiente'),
+                                  },
                                 ),
-                                const PopupMenuItem(
-                                  value: 2,
-                                  child: Text('Aprobado'),
-                                ),
-                                const PopupMenuItem(
-                                  value: 3,
-                                  child: Text('Rechazado'),
-                                ),
+                                if (document.statusId ==
+                                    1) // Solo mostrar el botón de cancelar si está pendiente
+                                  IconButton(
+                                    icon: const Icon(Icons.cancel),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => AlertDialog(
+                                          title:
+                                              const Text('Cancelar solicitud'),
+                                          content: const Text(
+                                              '¿Estás seguro de que deseas cancelar esta solicitud?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text('No'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                ref
+                                                    .read(documentProvider
+                                                        .notifier)
+                                                    .updateDocument(
+                                                      document.copyWith(
+                                                          statusId:
+                                                              4), // 4 es el ID del estado "Cancelado"
+                                                    );
+                                                Navigator.pop(context);
+                                              },
+                                              child: const Text('Sí'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                               ],
                             ),
                           ),
@@ -109,6 +175,8 @@ class DocumentListScreen extends ConsumerWidget {
         return 'Aprobado';
       case 3:
         return 'Rechazado';
+      case 4:
+        return 'Cancelado';
       default:
         return 'Desconocido';
     }
@@ -122,6 +190,8 @@ class DocumentListScreen extends ConsumerWidget {
         return Colors.green;
       case 3:
         return Colors.red;
+      case 4:
+        return Colors.red.shade300;
       default:
         return Colors.grey;
     }
