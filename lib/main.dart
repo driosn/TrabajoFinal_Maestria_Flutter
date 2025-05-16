@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/admin/presentation/screens/admin_home_screen.dart';
 
 import 'core/database/database_helper.dart';
 import 'features/auth/data/repositories/user_repository_impl.dart';
 import 'features/auth/presentation/providers/auth_provider.dart';
 import 'features/auth/presentation/screens/login_screen.dart';
-import 'features/auth/presentation/screens/user_management_screen.dart';
 import 'features/documents/data/repositories/document_repository_impl.dart';
 import 'features/documents/presentation/providers/document_provider.dart';
 import 'features/documents/presentation/screens/document_list_screen.dart';
@@ -35,6 +35,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'Gestión de Documentos',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
@@ -47,7 +48,7 @@ class MyApp extends ConsumerWidget {
             )
           : authState.currentUser != null
               ? authState.currentUser!.roleId == 2
-                  ? const UserManagementScreen()
+                  ? const AdminHomeScreen()
                   : const DocumentListScreen()
               : const LoginScreen(),
     );

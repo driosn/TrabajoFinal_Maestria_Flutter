@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../../core/database/database_helper.dart';
-import '../../../auth/data/repositories/user_repository_impl.dart';
-import '../../../auth/domain/entities/user.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/auth/domain/entities/user.dart';
+import 'package:proyecto_flutter_ucb_david_rios/features/auth/presentation/providers/auth_provider.dart';
 
 class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({super.key});
@@ -14,87 +12,167 @@ class UserManagementScreen extends ConsumerStatefulWidget {
 }
 
 class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
-  final UserRepositoryImpl _userRepository =
-      UserRepositoryImpl(DatabaseHelper());
-  List<User> _users = [];
-  bool _isLoading = true;
+  final _formKey = GlobalKey<FormState>();
+
+  int _selectedRoleId = 1; // Default to Editor role
+  bool _obscurePassword = true;
 
   @override
   void initState() {
+    ref.read(authProvider.notifier).loadUsers();
     super.initState();
-    _loadUsers();
-  }
-
-  Future<void> _loadUsers() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final users = await _userRepository.getUsers();
-      setState(() {
-        _users = users;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al cargar usuarios: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+  void dispose() {
+    super.dispose();
+  }
 
-    if (_users.isEmpty) {
-      return const Center(child: Text('No hay usuarios registrados'));
-    }
+  void _showCreateUserDialog() async {
+    final nameController = TextEditingController();
+    final lastNameController = TextEditingController();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
 
-    return ListView.builder(
-      itemCount: _users.length,
-      itemBuilder: (context, index) {
-        final user = _users[index];
-        return Card(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
-          child: ListTile(
-            leading: CircleAvatar(
-              child: Text(
-                user.name[0].toUpperCase(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            title: Text('${user.name} ${user.lastName}'),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Crear Usuario'),
+        content: SingleChildScrollView(
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(user.email),
-                Text(
-                  'Rol: ${user.role}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey.shade500,
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Nombre'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese un nombre';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: lastNameController,
+                  decoration: const InputDecoration(labelText: 'Apellido'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese un apellido';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese un email';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: 'Contraseña',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
                       ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
+                  ),
+                  obscureText: _obscurePassword,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Por favor ingrese una contraseña';
+                    }
+                    return null;
+                  },
+                ),
+                DropdownButtonFormField<int>(
+                  value: _selectedRoleId,
+                  decoration: const InputDecoration(labelText: 'Rol'),
+                  items: const [
+                    DropdownMenuItem(value: 1, child: Text('Editor')),
+                    DropdownMenuItem(value: 2, child: Text('Administrador')),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedRoleId = value!;
+                    });
+                  },
                 ),
               ],
             ),
           ),
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                final user = User(
+                  name: nameController.text,
+                  lastName: lastNameController.text,
+                  email: emailController.text,
+                  password: passwordController.text,
+                  roleId: _selectedRoleId,
+                  createdAt: DateTime.now(),
+                );
+                ref.read(authProvider.notifier).createUser(user);
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final users = ref.watch(authProvider).users;
+
+    return Scaffold(
+      body: ListView.builder(
+        itemCount: users.length,
+        itemBuilder: (context, index) {
+          final user = users[index];
+          return ListTile(
+            title: Text('${user.name} ${user.lastName}'),
+            subtitle: Text(user.email),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.delete),
+                  onPressed: () =>
+                      ref.read(authProvider.notifier).deleteUser(user.id!),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _showCreateUserDialog,
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

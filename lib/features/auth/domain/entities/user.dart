@@ -4,8 +4,8 @@ class User {
   final String lastName;
   final String email;
   final String password;
-  final String role;
-  final bool isActive;
+  final int roleId;
+  final DateTime createdAt;
 
   User({
     this.id,
@@ -13,41 +13,9 @@ class User {
     required this.lastName,
     required this.email,
     required this.password,
-    required this.role,
-    this.isActive = true,
+    required this.roleId,
+    required this.createdAt,
   });
-
-  User copyWith({
-    int? id,
-    String? name,
-    String? lastName,
-    String? email,
-    String? password,
-    String? role,
-    bool? isActive,
-  }) {
-    return User(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      lastName: lastName ?? this.lastName,
-      email: email ?? this.email,
-      password: password ?? this.password,
-      role: role ?? this.role,
-      isActive: isActive ?? this.isActive,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'lastName': lastName,
-      'email': email,
-      'password': password,
-      'role': role,
-      'isActive': isActive ? 1 : 0,
-    };
-  }
 
   factory User.fromMap(Map<String, dynamic> map) {
     return User(
@@ -56,8 +24,8 @@ class User {
       lastName: map['lastName'] as String,
       email: map['email'] as String,
       password: map['password'] as String,
-      role: map['role'] as String,
-      isActive: map['isActive'] == 1,
+      roleId: map['roleId'] as int,
+      createdAt: DateTime.parse(map['createdAt'] as String),
     );
   }
 }

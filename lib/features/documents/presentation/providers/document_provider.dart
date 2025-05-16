@@ -36,7 +36,7 @@ class DocumentNotifier extends StateNotifier<DocumentState> {
 
   DocumentNotifier(this._documentRepository) : super(DocumentState());
 
-  Future<void> _loadDocuments() async {
+  Future<void> loadDocuments() async {
     state = state.copyWith(isLoading: true);
     try {
       final documents = await _documentRepository.getDocuments();

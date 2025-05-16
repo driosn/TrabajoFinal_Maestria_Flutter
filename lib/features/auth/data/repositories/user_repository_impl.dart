@@ -69,6 +69,20 @@ class UserRepositoryImpl implements UserRepository {
       return null;
     }
 
+    return UserModel.fromJson(maps.first);
+  }
+
+  @override
+  Future<User?> getUserById(int id) async {
+    final db = await _databaseHelper.database;
+    final List<Map<String, dynamic>> maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+
+    if (maps.isEmpty) return null;
+
     return User.fromMap(maps.first);
   }
 }
