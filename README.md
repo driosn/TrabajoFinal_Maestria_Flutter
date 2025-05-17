@@ -31,7 +31,7 @@ La aplicación fue desarrollada con Riverpod, utilizando Arquitectura limpia hex
 
 ### Demostración de la aplicación
 
-Descarga de la aplicación
+Descarga de la aplicación [DESCARGAR APK](https://github.com/driosn/TrabajoFinal_Maestria_Flutter/blob/main/proyecto-david-rios.apk)
 
 
 
