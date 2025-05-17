@@ -26,8 +26,9 @@ El usuario Editor, puede subir diferentes documentos, al momento de sacar una fo
 
 La aplicación fue desarrollada con Riverpod, utilizando Arquitectura limpia hexagonal, MLKit para inteligencia artificial, y SQFlite para base de datos en Flutter.
 
-### Demostración de la aplicación
+### Demostración de la aplicación  
 
+[VER VIDEO DEMO](https://drive.google.com/file/d/1hOh-180VH2YkWU25rWbBRqj1sNdis-gB/view?usp=share_link)
 
 ### Demostración de la aplicación
 
