@@ -177,6 +177,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         )
                       : const Text('Iniciar Sesión'),
                 ),
+                const SizedBox(
+                  height: 48,
+                ),
+                const Text('Trabajo realizado por David Rios Nuñez')
               ],
             ),
           ),
