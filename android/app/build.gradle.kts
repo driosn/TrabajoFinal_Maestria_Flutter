@@ -29,10 +29,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.proyecto_flutter_ucb_david_rios"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
+        applicationId = "com.ucb.proyecto_flutter_david_rios"
         minSdk = 21  // Actualizando a 21 para soportar ML Kit
         targetSdk = 33  // Android 12
         versionCode = flutter.versionCode
